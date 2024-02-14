@@ -1,0 +1,6 @@
+python main.py -e exp1 -t random -n 10 -s 1234 -o result.txt
+git fetch --all
+git reset --hard origin/main
+python setup.py build_ext --inplace
+git checkout c1585e0c57^ algorithms/avalanche.py # reset a specific file from history commit
+git log -p --follow -- <filename> # see a file changed history even it changed name

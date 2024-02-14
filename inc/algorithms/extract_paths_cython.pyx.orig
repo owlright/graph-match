@@ -1,0 +1,97 @@
+# distutils: language=c++
+cimport cython
+#import numpy as np
+#cimport numpy as np
+#import cython
+#from libcpp.map cimport map
+from libcpp.unordered_map cimport unordered_map
+from libc.stdlib cimport malloc, free
+# "cimport" is used to import special compile-time information
+# about the numpy module (this is stored in a file numpy.pxd which is
+# currently part of the Cython distribution).
+
+#np.import_array()
+# We now need to fix a datatype for our arrays. I've used the variable
+# DTYPE for this, which is assigned to the usual NumPy runtime
+# type info object.
+
+#DTYPE = np.int32
+#cdef int DTYPE_MAX = np.iinfo(DTYPE).max
+cdef int INT_MAX = 2147483647
+# "ctypedef" assigns a corresponding compile-time type to DTYPE_t. For
+# every type in the numpy module there's a corresponding compile-time
+# type with a _t-suffix.
+#ctypedef np.int32_t DTYPE_t
+@cython.boundscheck(False) # turn off bounds-checking for entire function
+@cython.wraparound(False)  # turn off negative index wrapping for entire function
+#def extract_paths(np.ndarray[DTYPE_t] S, np.ndarray[DTYPE_t] mstnodes, np.ndarray[DTYPE_t, ndim=2] oddist):
+def extract_paths(int[:] S, int[:] mstnodes, int[:,:] oddist):
+  cdef unordered_map[int, int] P
+  cdef int r = mstnodes[0]
+  cdef int Tlen = len(mstnodes) # number of nodes in the mstT
+  cdef int Slen = len(S)
+  # cdef np.ndarray[DTYPE_t] TSeq = np.arange(Tlen, dtype=DTYPE) # nouse
+
+  # * similar to Prim algo
+  #cdef np.ndarray[DTYPE_t]  in_mst_set = np.zeros(Tlen, dtype=DTYPE)
+  #cdef np.ndarray[DTYPE_t]  parent = np.empty(Tlen, dtype=DTYPE)
+  #cdef np.ndarray[DTYPE_t]   dist = np.full(Tlen, DTYPE_MAX, dtype=DTYPE)
+  cdef int* in_mst_set = <int *> malloc(Tlen*sizeof(int))
+  #in_mst_set[:] = int(0)
+  cdef int*  parent = <int *>malloc(Tlen*sizeof(int))
+  #parent[:] = int(-1)
+  cdef int* dist = <int *>malloc(Tlen*sizeof(int))
+  for i in range(Tlen):
+    in_mst_set[i] = 0
+    parent[i] = -1
+    dist[i] = int(INT_MAX)
+
+  in_mst_set[0] = 1 # r is in mstnodes
+  dist[0] = 0
+  parent[0] = -1
+  #cdef int uind = -1
+  #cdef int uT = -1
+  #cdef int u = -1
+  cdef int node_in_tree = -1
+  cdef int v = -1
+  cdef int d = INT_MAX
+  cdef int closest_node_parent = -1
+  cdef int closest_node = r
+  cdef int closest_index = 0
+  for _ in range(Tlen-1):
+    # * get the closet node to the tree
+    d = INT_MAX
+    for i in range(Tlen):
+      if in_mst_set[i]==0:
+        if dist[i] < d:
+          d = dist[i]
+          closest_index = i
+          closest_node = mstnodes[i]
+    in_mst_set[closest_index] = 1 # insert this node into tree
+    # parent[closest_index] = mstnodes[parent[closest_index]]
+    #uind = np.argmin(dist[outMstSet])
+    #uT = TSeq[outMstSet][uind]
+    #u = mstnodes[uT] # ! the current closest node is u
+    #outMstSet[uT] = False
+
+    # * connect the closest path to T
+    # node_in_tree = mstnodes[parent[uT]]
+   # P[closest_node] = mstnodes[parent[closest_index]]
+    # ! update the rest nodes' distance to T
+    for i in range(Tlen):
+      v = mstnodes[i]
+      if in_mst_set[i]==0 and oddist[v, closest_node] < dist[i]:
+        dist[i] = oddist[v, closest_node]
+        parent[i] = closest_index
+  # ! Step 2. extract the paths from sources to computation nodes or target
+  d = INT_MAX
+  cdef int s = 0
+  for i in range(Slen):
+    s = S[i]
+    d = INT_MAX
+    for j in range(Tlen):
+      if oddist[s, mstnodes[j]] < d:
+        d = oddist[s, mstnodes[j]]
+       # P[s] = mstnodes[j]
+
+  return
