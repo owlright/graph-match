@@ -5,6 +5,7 @@ import numpy as np
 import networkx as nx
 import igraph as ig
 
+
 def get_table_format(parameter_len, baseline_len, algo_len):
     # res_col_len = 10
     # cap_col_len = 10
@@ -35,6 +36,7 @@ def get_table_format(parameter_len, baseline_len, algo_len):
         + f"{{:^{int(algo_col_width/2)}d}}|" * algo_len * 2
     )
     return table_border, table_header_format, table_format
+
 
 def get_treesolution(sources, targets, trees):
     assert len(sources) == len(targets) == len(trees)
@@ -102,15 +104,15 @@ def get_paths(G):
     # odpath = dict()
     g = ig.Graph(n=len(G), edges=list(G.edges()))
     for o in range(len(G)):
-      for d in range(o+1, len(G)):
-        p = g.get_shortest_paths(o, to=d)[0]
-        odpath[o, d] = p.copy()
-        p.reverse()
-        odpath[d, o] = p
-        oddist[o, d] = oddist[d, o] = len(p) - 1
+        for d in range(o + 1, len(G)):
+            p = g.get_shortest_paths(o, to=d)[0]
+            odpath[o, d] = p.copy()
+            p.reverse()
+            odpath[d, o] = p
+            oddist[o, d] = oddist[d, o] = len(p) - 1
     for o in range(len(G)):
-      odpath[o, o] = []
-      oddist[o, o] = 0
+        odpath[o, o] = []
+        oddist[o, o] = 0
     # for o, d_p in nx.all_pairs_dijkstra_path(G):
     #     for d, p in d_p.items():
     #         odpath[o, d] = p.copy()

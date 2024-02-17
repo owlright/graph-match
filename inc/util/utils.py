@@ -12,6 +12,7 @@ try:
     from .plotters import *
 except ImportError:
     import sys, os
+
     sys.path.append(os.getcwd())
     from inc.util.color import *
     from inc.topo import *
@@ -21,19 +22,25 @@ INT32_MAX = 2147483647
 import warnings
 import functools
 
+
 def deprecated(func):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
     when the function is used."""
+
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-        warnings.warn("Call to deprecated function {}.".format(func.__name__),
-                      category=DeprecationWarning,
-                      stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning)  # reset filter
+        warnings.simplefilter("always", DeprecationWarning)  # turn off filter
+        warnings.warn(
+            "Call to deprecated function {}.".format(func.__name__),
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        warnings.simplefilter("default", DeprecationWarning)  # reset filter
         return func(*args, **kwargs)
+
     return new_func
+
 
 def crange(i, j):
     return range(i, j + 1)
@@ -64,7 +71,7 @@ def get_attr_edges(G, k, v) -> list:
 
 
 def label_node_depth_in_arborescence(G: nx.DiGraph, root) -> None:
-    '''give each node its depth in the tree'''
+    """give each node its depth in the tree"""
     # todo The algorithm cannot deal with outdegree >=2
     for n in G:
         assert G.out_degree(n) <= 1
@@ -84,13 +91,11 @@ def label_node_depth_in_arborescence(G: nx.DiGraph, root) -> None:
         G.add_nodes_from(current_layer, level=current_distance)
         current_layer = next_layer
         current_distance += 1
-    G.graph['depth'] = current_distance - 1
+    G.graph["depth"] = current_distance - 1
 
 
 def arborescence(G: nx.Graph, sources: list, root: int) -> nx.DiGraph:
-    """Make an undirected tree to directed
-
-  """
+    """Make an undirected tree to directed"""
     # terminals = get_attr_nodes(G, 'terminal', True)
     # terminals.remove(root)
     # tree_edges = get_attr_edges(G, 'intree', True)
@@ -110,9 +115,11 @@ def is_arborescence(G: nx.DiGraph):
 
 
 def update_graph(G: nx.Graph, S: nx.Graph) -> None:
-    '''copy what attrs G needs from S'''
+    """copy what attrs G needs from S"""
     G._node.update((n, d.copy()) for n, d in S.nodes.items() if G.has_node(n))
-    G.add_edges_from((u, v, d.copy()) for (u, v, d) in S.edges(data=True) if G.has_edge(u, v))
+    G.add_edges_from(
+        (u, v, d.copy()) for (u, v, d) in S.edges(data=True) if G.has_edge(u, v)
+    )
     G.graph.update(S.graph)
 
 
@@ -129,9 +136,9 @@ def set_load(G: nx.Graph, connected_switches) -> None:
         if v in connected_switches:
             # NOTE the terminal should aggregation its messages first \
             # so the load should always be 1?
-            G.nodes[v]['load'] = random.randint(1, 10)
+            G.nodes[v]["load"] = random.randint(1, 10)
         else:
-            G.nodes[v]['load'] = 0
+            G.nodes[v]["load"] = 0
 
     # leaf_switches = get_attr_nodes(G, 'level', 1)
     # for v in leaf_switches:
@@ -141,13 +148,13 @@ def set_load(G: nx.Graph, connected_switches) -> None:
 
 
 def set_capacity(G: nx.Graph, switch_memory, switches=None):
-    all_switches = get_attr_nodes(G, 'type', 'switch')
+    all_switches = get_attr_nodes(G, "type", "switch")
     if switches is None:
         switches = all_switches
     else:
         left_switches = list(set(all_switches) - set(switches))
         G.add_nodes_from(left_switches, capacity=0)
-    hosts = get_attr_nodes(G, 'type', 'host')
+    hosts = get_attr_nodes(G, "type", "host")
     G.add_nodes_from(hosts, capacity=0)
     G.add_nodes_from(switches, capacity=switch_memory)
     # num_switches = len(switches)
@@ -157,25 +164,27 @@ def set_capacity(G: nx.Graph, switch_memory, switches=None):
 
 
 def load(G: nx.DiGraph, v):
-    '''collect the number of msgs node v receive,
-  but actually only the leaf switch has msgs
-  '''
-    return G.nodes[v].get('load', 0)
+    """collect the number of msgs node v receive,
+    but actually only the leaf switch has msgs
+    """
+    return G.nodes[v].get("load", 0)
 
 
-def get_reindexed_graph(G: nx.Graph, hosts_num=None, switches_num=None) -> tuple[nx.Graph, dict]:
+def get_reindexed_graph(
+    G: nx.Graph, hosts_num=None, switches_num=None
+) -> tuple[nx.Graph, dict]:
     D = nx.Graph()
     indexMap = {}
     if not hosts_num:
-        hosts_num = len(get_attr_nodes(G, 'type', 'host'))
+        hosts_num = len(get_attr_nodes(G, "type", "host"))
     if not switches_num:
-        switches_num = len(get_attr_nodes(G, 'type', 'switch'))
+        switches_num = len(get_attr_nodes(G, "type", "switch"))
     hostIndex = switches_num
     switchIndex = 0
     for n in G:
-        if G.nodes[n]['type'] == "switch":
+        if G.nodes[n]["type"] == "switch":
             indexMap[n] = switchIndex
-            D.add_node(switchIndex, type='switch')
+            D.add_node(switchIndex, type="switch")
             # if "pos" in G.nodes[n]:
             #   D.nodes[switchIndex]["pos"] = G.nodes[n]["pos"]
             switchIndex += 1
@@ -188,7 +197,10 @@ def get_reindexed_graph(G: nx.Graph, hosts_num=None, switches_num=None) -> tuple
     # ! update node attrs
     D._node.update((indexMap.get(n, n), d.copy()) for n, d in G.nodes.items())
     D.graph.update(G.graph)
-    D.add_edges_from((indexMap.get(n1, n1), indexMap.get(n2, n2), d.copy()) for (n1, n2, d) in G.edges(data=True))
+    D.add_edges_from(
+        (indexMap.get(n1, n1), indexMap.get(n2, n2), d.copy())
+        for (n1, n2, d) in G.edges(data=True)
+    )
     # for u,v in G.edges:
     #   D.add_edge(indexMap[u], indexMap[v], weight=1)
     assert hostIndex == hosts_num + switches_num
@@ -506,18 +518,18 @@ def test_update_graph():
     random.seed(23234)
     G = fattree(4, False)
     for n in G:
-        G.nodes[n]["from"] = 'G'
+        G.nodes[n]["from"] = "G"
     for e in G.edges():
-        G.edges[e]['from'] = 'G'
-    members = [0, 3, 'out']
+        G.edges[e]["from"] = "G"
+    members = [0, 3, "out"]
     F = nx.empty_graph(members)
     F.add_edge(0, 16)  # existed edge
     F.add_edge(16, 32)  # not existed edge
     update_graph(F, G)
 
-    assert F.nodes[0]['from'] == 'G'
-    assert F[0][16]['from'] == 'G'
-    assert F.nodes['out'] == {}
+    assert F.nodes[0]["from"] == "G"
+    assert F[0][16]["from"] == "G"
+    assert F.nodes["out"] == {}
     assert F[16][32] == {}
 
 

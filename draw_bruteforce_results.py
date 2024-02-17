@@ -9,20 +9,20 @@ figure_dir = f"C:/Users/SJH/Documents/thesis/figures/"
 # reading data from file
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-f', '--format',
-                    help="the type of output picture",
-                    default="tif",
-                    type=str,
-                    )
-parser.add_argument('-t', '--topo',
-                    help="the input file name",
-                    default="bcube",
-                    type=str)
+parser.add_argument(
+    "-f",
+    "--format",
+    help="the type of output picture",
+    default="tif",
+    type=str,
+)
+parser.add_argument(
+    "-t", "--topo", help="the input file name", default="bcube", type=str
+)
 
-parser.add_argument('-d', '--directory',
-                    help="the input file name",
-                    default=os.getcwd(),
-                    type=str)
+parser.add_argument(
+    "-d", "--directory", help="the input file name", default=os.getcwd(), type=str
+)
 
 # parser.add_argument('-o', '--output',
 #                     help="picture you want to output",
@@ -33,7 +33,7 @@ parser.add_argument('-d', '--directory',
 args = parser.parse_args()
 figure_dir = args.directory
 pic_type = args.format
-input_file = args.topo + '-bruteforce-result.txt'
+input_file = args.topo + "-bruteforce-result.txt"
 # plot_which = args.output
 # print(plot_which)
 
@@ -50,83 +50,85 @@ bruterforceused = {}
 gcatused = {}
 bruteforce_compressratio = {}
 gcat_compressratio = {}
-bruteforce_eff= {}
+bruteforce_eff = {}
 gcat_eff = {}
 
 for topo in topos:
-  bruteforcecosts[topo] = []; bruterforceused[topo] = []
-  gcatcosts[topo] = []; gcatused[topo] = []
-  originalcosts[topo] = []
-  bruteforce_compressratio[topo] = []
-  gcat_compressratio[topo] = []
-  bruteforce_eff[topo] = []
-  gcat_eff[topo] = []
+    bruteforcecosts[topo] = []
+    bruterforceused[topo] = []
+    gcatcosts[topo] = []
+    gcatused[topo] = []
+    originalcosts[topo] = []
+    bruteforce_compressratio[topo] = []
+    gcat_compressratio[topo] = []
+    bruteforce_eff[topo] = []
+    gcat_eff[topo] = []
 
 for topo in topos:
-  line = resultFile.readline().strip()
-  assert line == topo
-  for _ in range(number_of_experiments):
-    orginal_cost = int(resultFile.readline().strip())
-    originalcosts[topo].append(orginal_cost)
-    line = resultFile.readline()
-    bcost = []
-    bused = []
-    gcost = []
-    gused = []
-    bcomp = []
-    gcomp = []
-    beff = []
-    geff = []
-    while line != "\n":
-      data = line.split()
-      bcost.append(int(data[1]))
-      gcost.append(int(data[2]))
-      bused.append(int(data[3]))
-      gused.append(int(data[4]))
-      bcomp.append(1 - int(data[1])/orginal_cost)
-      gcomp.append(1 - int(data[2])/orginal_cost)
-      beff.append(bcomp[-1] / int(data[3]))
-      geff.append(gcomp[-1]/ int(data[4]))
-      line = resultFile.readline()
-    bcost.pop()
-    bused.pop()
-    gcost.pop()
-    gused.pop()
-    bcomp.pop()
-    gcomp.pop()
-    beff.pop()
-    geff.pop()
-    bruteforcecosts[topo].append(bcost)
-    gcatcosts[topo].append(gcost)
-    bruterforceused[topo].append(bused)
-    gcatused[topo].append(gused)
-    bruteforce_compressratio[topo].append(bcomp)
-    gcat_compressratio[topo].append(gcomp)
-    bruteforce_eff[topo].append(beff)
-    gcat_eff[topo].append(geff)
+    line = resultFile.readline().strip()
+    assert line == topo
+    for _ in range(number_of_experiments):
+        orginal_cost = int(resultFile.readline().strip())
+        originalcosts[topo].append(orginal_cost)
+        line = resultFile.readline()
+        bcost = []
+        bused = []
+        gcost = []
+        gused = []
+        bcomp = []
+        gcomp = []
+        beff = []
+        geff = []
+        while line != "\n":
+            data = line.split()
+            bcost.append(int(data[1]))
+            gcost.append(int(data[2]))
+            bused.append(int(data[3]))
+            gused.append(int(data[4]))
+            bcomp.append(1 - int(data[1]) / orginal_cost)
+            gcomp.append(1 - int(data[2]) / orginal_cost)
+            beff.append(bcomp[-1] / int(data[3]))
+            geff.append(gcomp[-1] / int(data[4]))
+            line = resultFile.readline()
+        bcost.pop()
+        bused.pop()
+        gcost.pop()
+        gused.pop()
+        bcomp.pop()
+        gcomp.pop()
+        beff.pop()
+        geff.pop()
+        bruteforcecosts[topo].append(bcost)
+        gcatcosts[topo].append(gcost)
+        bruterforceused[topo].append(bused)
+        gcatused[topo].append(gused)
+        bruteforce_compressratio[topo].append(bcomp)
+        gcat_compressratio[topo].append(gcomp)
+        bruteforce_eff[topo].append(beff)
+        gcat_eff[topo].append(geff)
 resultFile.close()
 
 algos = ["OPT", "GCAT"]
 # print(algos)
 for topo in topos:
-  print(topo)
-  print("compress", "effiency")
-  y1 = []
-  y2 = []
-  for algo in algos:
-    if algo == "OPT":
-      comp = bruteforce_compressratio[topo]
-      eff = bruteforce_eff[topo]
-    elif algo == "GCAT":
-      comp = gcat_compressratio[topo]
-      eff = gcat_eff[topo]
-    # oc = originalcosts[topo]
-    exp1 = [sum(tmp)/len(tmp) for tmp in comp]
-    exp2 = [sum(tmp)/len(tmp) for tmp in eff]
-    y1.append(sum(exp1)/len(exp1))
-    y2.append(sum(exp2)/len(exp2))
-  print(y1)
-  print(y2)
+    print(topo)
+    print("compress", "effiency")
+    y1 = []
+    y2 = []
+    for algo in algos:
+        if algo == "OPT":
+            comp = bruteforce_compressratio[topo]
+            eff = bruteforce_eff[topo]
+        elif algo == "GCAT":
+            comp = gcat_compressratio[topo]
+            eff = gcat_eff[topo]
+        # oc = originalcosts[topo]
+        exp1 = [sum(tmp) / len(tmp) for tmp in comp]
+        exp2 = [sum(tmp) / len(tmp) for tmp in eff]
+        y1.append(sum(exp1) / len(exp1))
+        y2.append(sum(exp2) / len(exp2))
+    print(y1)
+    print(y2)
 
 
 # math_font = "stix"
@@ -137,7 +139,6 @@ for topo in topos:
 
 # colors = ['k',  'red']
 # hatches = ['x', '..']
-
 
 
 # print(topos)
@@ -168,9 +169,9 @@ for topo in topos:
 # offset = 0
 
 
-  # p = ax.bar(x+bar_width*offset, y,bar_width, fill=False, edgecolor=colors[index], hatch=hatches[index],  align='edge', label=algo)
-  # ax.bar_label(p, fmt='%.2f', size=10, padding=1, label_type='edge')
-  # offset += 1
+# p = ax.bar(x+bar_width*offset, y,bar_width, fill=False, edgecolor=colors[index], hatch=hatches[index],  align='edge', label=algo)
+# ax.bar_label(p, fmt='%.2f', size=10, padding=1, label_type='edge')
+# offset += 1
 
 # for algo in algos:
 #   y = []
