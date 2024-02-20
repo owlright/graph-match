@@ -11,6 +11,7 @@ decreapted/
 *.png
 *.lp
 *.sol
+*.ilp
 *.ipynb
 *.svg
 *.tif

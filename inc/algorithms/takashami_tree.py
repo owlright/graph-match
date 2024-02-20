@@ -14,7 +14,7 @@ except:
 def takashami_tree(G: nx.DiGraph, sources, target, weight=None) -> nx.DiGraph:
     T = nx.DiGraph()
     srcs = set(sources)
-    visited = set([target])
+    visited = {target}
     q = []
     while srcs:
         for v in visited:
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     # for n in G.nodes():
     # print(f"To {n}: min length:{length[n]}, path:{path[n]}")
-    c, T = takashami_tree(G, ["C", "D", "E"], "H")
+    T = takashami_tree(G, ["C", "D", "E"], "H")
 
     plot(T, pos=layout)
     plt.show()
