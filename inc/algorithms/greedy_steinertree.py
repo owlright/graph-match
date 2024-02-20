@@ -188,7 +188,7 @@ def gst(sources, targets, steiner_trees, capacity, M, oddist, odpath):
 
 
 if __name__ == "__main__":
-    G = minitopo()
+    G = mypaper_topo()
     switches = get_attr_nodes(G, "type", "switch")
     hosts = get_attr_nodes(G, "type", "host")
     G.add_nodes_from(hosts, capacity=0)

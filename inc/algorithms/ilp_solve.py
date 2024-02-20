@@ -16,24 +16,11 @@ if __name__ == "__main__":
     import sys, os
 
     sys.path.append(os.getcwd())
-    from inc.topo import minitopo
+    from inc.topo import mypaper_topo
     from inc.util.utils import *
     from inc.algorithms.extract_paths import extract_paths
 else:
     from ..util.utils import *
-
-    # import coloredlogs
-    # FORMAT = '[%(levelname)s: %(funcName)s %(lineno)3d] %(message)s'
-    # coloredlogs.install(level='debug', logger=logger, fmt=FORMAT)
-# import my own code
-# try:
-#     from ..util import *
-# except ImportError:
-#     import sys
-#     import os
-#     sys.path.append(os.getcwd())
-#     from util import *
-#     from topo import *
 
 
 def binary_ilp_solve(sources, targets, S, arcs, capactity, M):
@@ -688,7 +675,7 @@ def test():
 
 def test1():
     random.seed(4441)
-    G = minitopo()
+    G = mypaper_topo()
     hosts_num = len(get_attr_nodes(G, "type", "host"))
     switches_num = len(get_attr_nodes(G, "type", "switch"))
     G, node2index = get_reindexed_graph(G, hosts_num, switches_num)
@@ -721,7 +708,7 @@ def test1():
 
 def test_binary_solve():
     random.seed(4441)
-    G = minitopo()
+    G = mypaper_topo()
     hosts_num = len(get_attr_nodes(G, "type", "host"))
     switches_num = len(get_attr_nodes(G, "type", "switch"))
     G, node2index = get_reindexed_graph(G, hosts_num, switches_num)

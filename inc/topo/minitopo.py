@@ -1,7 +1,7 @@
 import networkx as nx
 
 
-def minitopo():
+def mypaper_topo():
     a = "a"
     b = "b"
     c = "c"
